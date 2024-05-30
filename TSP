@@ -10,21 +10,26 @@ using namespace std;
 
 const int INF = INT_MAX;
 
-void dfs(int start, int curr, vector<vector<int>>& dist, vector<bool>& visited, int count, int cost, int& min_cost, int& max_edge) {
+// Depth-First Search function to find the minimum cost path
+void dfs(int start, int curr, vector<vector<int>>& dist, vector<bool>& visited, int count, int cost, int& min_cost, int max_edge) {
+    // If all cities are visited and there is an edge back to the start city
     if (count == dist.size() && dist[curr][start] != INF) {
+        // Update the minimum cost with the maximum edge in the path
         min_cost = min(min_cost, max(max_edge, dist[curr][start]));
         return;
     }
 
+    // Explore all possible paths
     for (int i = 0; i < dist.size(); ++i) {
         if (!visited[i] && dist[curr][i] != INF) {
             visited[i] = true;
             dfs(start, i, dist, visited, count + 1, cost + dist[curr][i], min_cost, max(max_edge, dist[curr][i]));
-            visited[i] = false;
+            visited[i] = false; // Backtrack
         }
     }
 }
 
+// Function to solve TSP using DFS
 int tsp_dfs(vector<vector<int>>& dist) {
     int min_cost = INF;
     vector<bool> visited(dist.size(), false);
@@ -34,6 +39,7 @@ int tsp_dfs(vector<vector<int>>& dist) {
 }
 
 int main() {
+    // Distance matrix
     vector<vector<int>> dist = {
         {INF, 10, 15, 20},
         {10, INF, 35, 25},
@@ -45,6 +51,7 @@ int main() {
 
     return 0;
 }
+
 
 
 
@@ -61,30 +68,36 @@ using namespace std;
 
 const int INF = INT_MAX;
 
+// Node structure for UCS
 struct Node {
     int city, cost, max_edge, count;
     vector<bool> visited;
 
+    // Overloading the greater than operator for priority queue
     bool operator>(const Node& other) const {
         return cost > other.cost;
     }
 };
 
+// Function to solve TSP using UCS
 int tsp_ucs(vector<vector<int>>& dist) {
     priority_queue<Node, vector<Node>, greater<Node>> pq;
     pq.push({0, 0, 0, 1, vector<bool>(dist.size(), false)});
     pq.top().visited[0] = true;
     int min_cost = INF;
 
+    // UCS algorithm
     while (!pq.empty()) {
         Node curr = pq.top();
         pq.pop();
 
+        // If all cities are visited and there is an edge back to the start city
         if (curr.count == dist.size() && dist[curr.city][0] != INF) {
             min_cost = min(min_cost, max(curr.max_edge, dist[curr.city][0]));
             continue;
         }
 
+        // Explore all possible paths
         for (int i = 0; i < dist.size(); ++i) {
             if (!curr.visited[i] && dist[curr.city][i] != INF) {
                 Node next = curr;
@@ -102,6 +115,7 @@ int tsp_ucs(vector<vector<int>>& dist) {
 }
 
 int main() {
+    // Distance matrix
     vector<vector<int>> dist = {
         {INF, 10, 15, 20},
         {10, INF, 35, 25},
@@ -133,15 +147,18 @@ using namespace std;
 
 const int INF = INT_MAX;
 
+// Node structure for A* Search
 struct Node {
     int city, cost, max_edge, count;
     vector<bool> visited;
 
+    // Overloading the greater than operator for priority queue
     bool operator>(const Node& other) const {
         return cost > other.cost;
     }
 };
 
+// Heuristic function for A* Search
 int heuristic(vector<vector<int>>& dist, Node& node) {
     // Sum of the minimum outgoing edges for the unvisited nodes
     int h = 0;
@@ -159,21 +176,25 @@ int heuristic(vector<vector<int>>& dist, Node& node) {
     return h;
 }
 
+// Function to solve TSP using A* Search
 int tsp_astar(vector<vector<int>>& dist) {
     priority_queue<Node, vector<Node>, greater<Node>> pq;
     pq.push({0, 0, 0, 1, vector<bool>(dist.size(), false)});
     pq.top().visited[0] = true;
     int min_cost = INF;
 
+    // A* Search algorithm
     while (!pq.empty()) {
         Node curr = pq.top();
         pq.pop();
 
+        // If all cities are visited and there is an edge back to the start city
         if (curr.count == dist.size() && dist[curr.city][0] != INF) {
             min_cost = min(min_cost, max(curr.max_edge, dist[curr.city][0]));
             continue;
         }
 
+        // Explore all possible paths
         for (int i = 0; i < dist.size(); ++i) {
             if (!curr.visited[i] && dist[curr.city][i] != INF) {
                 Node next = curr;
@@ -182,6 +203,7 @@ int tsp_astar(vector<vector<int>>& dist) {
                 next.max_edge = max(curr.max_edge, dist[curr.city][i]);
                 next.count++;
                 next.visited[i] = true;
+                // Add heuristic to the cost
                 next.cost += heuristic(dist, next);
                 pq.push(next);
             }
@@ -192,6 +214,7 @@ int tsp_astar(vector<vector<int>>& dist) {
 }
 
 int main() {
+    // Distance matrix
     vector<vector<int>> dist = {
         {INF, 10, 15, 20},
         {10, INF, 35, 25},
@@ -203,3 +226,4 @@ int main() {
 
     return 0;
 }
+
