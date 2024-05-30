@@ -19,7 +19,7 @@ To compile the code, follow these steps:
 1. Ensure you have a C++ compiler installed on your system. This code has been tested with GCC compiler version 9.3.0.
 
 2. Clone the repository to your local machine.
-        git clone <repository_url>
+        git clone [<repository_url>](https://github.com/iovangeorge/homeworkAI)
 
 3. Navigate to the directory containing the source code files.
        cd TSP_Strategies_CPP
