@@ -1,0 +1,205 @@
+1. Depth-First Search (DFS)
+DFS explores all possible paths exhaustively and is implemented using recursion and backtracking.
+
+#include <iostream>
+#include <vector>
+#include <climits>
+#include <algorithm>
+
+using namespace std;
+
+const int INF = INT_MAX;
+
+void dfs(int start, int curr, vector<vector<int>>& dist, vector<bool>& visited, int count, int cost, int& min_cost, int& max_edge) {
+    if (count == dist.size() && dist[curr][start] != INF) {
+        min_cost = min(min_cost, max(max_edge, dist[curr][start]));
+        return;
+    }
+
+    for (int i = 0; i < dist.size(); ++i) {
+        if (!visited[i] && dist[curr][i] != INF) {
+            visited[i] = true;
+            dfs(start, i, dist, visited, count + 1, cost + dist[curr][i], min_cost, max(max_edge, dist[curr][i]));
+            visited[i] = false;
+        }
+    }
+}
+
+int tsp_dfs(vector<vector<int>>& dist) {
+    int min_cost = INF;
+    vector<bool> visited(dist.size(), false);
+    visited[0] = true;
+    dfs(0, 0, dist, visited, 1, 0, min_cost, 0);
+    return min_cost;
+}
+
+int main() {
+    vector<vector<int>> dist = {
+        {INF, 10, 15, 20},
+        {10, INF, 35, 25},
+        {15, 35, INF, 30},
+        {20, 25, 30, INF}
+    };
+
+    cout << "Minimum cost using DFS: " << tsp_dfs(dist) << endl;
+
+    return 0;
+}
+
+
+
+
+2. Uniform Cost Search (UCS)
+UCS is a breadth-first search algorithm that expands the least cost node first.
+
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <climits>
+
+using namespace std;
+
+const int INF = INT_MAX;
+
+struct Node {
+    int city, cost, max_edge, count;
+    vector<bool> visited;
+
+    bool operator>(const Node& other) const {
+        return cost > other.cost;
+    }
+};
+
+int tsp_ucs(vector<vector<int>>& dist) {
+    priority_queue<Node, vector<Node>, greater<Node>> pq;
+    pq.push({0, 0, 0, 1, vector<bool>(dist.size(), false)});
+    pq.top().visited[0] = true;
+    int min_cost = INF;
+
+    while (!pq.empty()) {
+        Node curr = pq.top();
+        pq.pop();
+
+        if (curr.count == dist.size() && dist[curr.city][0] != INF) {
+            min_cost = min(min_cost, max(curr.max_edge, dist[curr.city][0]));
+            continue;
+        }
+
+        for (int i = 0; i < dist.size(); ++i) {
+            if (!curr.visited[i] && dist[curr.city][i] != INF) {
+                Node next = curr;
+                next.city = i;
+                next.cost += dist[curr.city][i];
+                next.max_edge = max(curr.max_edge, dist[curr.city][i]);
+                next.count++;
+                next.visited[i] = true;
+                pq.push(next);
+            }
+        }
+    }
+
+    return min_cost;
+}
+
+int main() {
+    vector<vector<int>> dist = {
+        {INF, 10, 15, 20},
+        {10, INF, 35, 25},
+        {15, 35, INF, 30},
+        {20, 25, 30, INF}
+    };
+
+    cout << "Minimum cost using UCS: " << tsp_ucs(dist) << endl;
+
+    return 0;
+}
+
+
+
+
+
+
+
+3. A* Search
+A* search uses a heuristic to guide the search. Here, we define a heuristic that estimates the minimum possible cost to complete the tour from the current state.
+
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <climits>
+#include <numeric>
+
+using namespace std;
+
+const int INF = INT_MAX;
+
+struct Node {
+    int city, cost, max_edge, count;
+    vector<bool> visited;
+
+    bool operator>(const Node& other) const {
+        return cost > other.cost;
+    }
+};
+
+int heuristic(vector<vector<int>>& dist, Node& node) {
+    // Sum of the minimum outgoing edges for the unvisited nodes
+    int h = 0;
+    for (int i = 0; i < dist.size(); ++i) {
+        if (!node.visited[i]) {
+            int min_edge = INF;
+            for (int j = 0; j < dist.size(); ++j) {
+                if (i != j && dist[i][j] != INF) {
+                    min_edge = min(min_edge, dist[i][j]);
+                }
+            }
+            h += min_edge;
+        }
+    }
+    return h;
+}
+
+int tsp_astar(vector<vector<int>>& dist) {
+    priority_queue<Node, vector<Node>, greater<Node>> pq;
+    pq.push({0, 0, 0, 1, vector<bool>(dist.size(), false)});
+    pq.top().visited[0] = true;
+    int min_cost = INF;
+
+    while (!pq.empty()) {
+        Node curr = pq.top();
+        pq.pop();
+
+        if (curr.count == dist.size() && dist[curr.city][0] != INF) {
+            min_cost = min(min_cost, max(curr.max_edge, dist[curr.city][0]));
+            continue;
+        }
+
+        for (int i = 0; i < dist.size(); ++i) {
+            if (!curr.visited[i] && dist[curr.city][i] != INF) {
+                Node next = curr;
+                next.city = i;
+                next.cost += dist[curr.city][i];
+                next.max_edge = max(curr.max_edge, dist[curr.city][i]);
+                next.count++;
+                next.visited[i] = true;
+                next.cost += heuristic(dist, next);
+                pq.push(next);
+            }
+        }
+    }
+
+    return min_cost;
+}
+
+int main() {
+    vector<vector<int>> dist = {
+        {INF, 10, 15, 20},
+        {10, INF, 35, 25},
+        {15, 35, INF, 30},
+        {20, 25, 30, INF}
+    };
+
+    cout << "Minimum cost using A*: " << tsp_astar(dist) << endl;
+
+    return 0;
+}
